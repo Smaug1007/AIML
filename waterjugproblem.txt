@@ -1,0 +1,71 @@
+def gcd(a, b):
+    if b == 0:
+        return a
+    return gcd(b, a % b)
+
+def Pour(toJugCap, fromJugCap, d):
+    fromJug = fromJugCap
+    toJug = 0
+    step = 1
+    steps = []  
+    while (fromJug != d and toJug != d):
+     
+        temp = min(fromJug, toJugCap - toJug)
+
+        
+        toJug += temp
+        fromJug -= temp
+
+        steps.append(f"Step {step}: Pour {temp} liters from jug with capacity {fromJugCap} to jug with capacity {toJugCap}.")
+        step += 1
+
+        if (fromJug == d or toJug == d):
+            break
+
+        
+        if fromJug == 0:
+            fromJug = fromJugCap
+            steps.append(f"Step {step}: Fill the jug with capacity {fromJugCap}.")
+            step += 1
+
+       
+        if toJug == toJugCap:
+            toJug = 0
+            steps.append(f"Step {step}: Empty the jug with capacity {toJugCap}.")
+            step += 1
+
+    return step, steps
+
+def minSteps(n, m, d):
+    if m > n:
+        temp = m
+        m = n
+        n = temp
+
+    if (d % gcd(n, m) != 0):
+        return -1, [] 
+
+ 
+    steps1 = Pour(n, m, d)
+    steps2 = Pour(m, n, d)
+
+    if steps1[0] < steps2[0]:
+        return steps1
+    else:
+        return steps2
+
+
+if __name__ == '__main__':
+    n = 3  
+    m = 5  
+    d = 4  
+
+    steps_count, steps = minSteps(n, m, d)
+
+    if steps_count == -1:
+        print("It's not possible to measure the desired amount.")
+    else:
+        print('Minimum number of steps required is', steps_count)
+        print("Steps taken:")
+        for step in steps:
+            print(step)

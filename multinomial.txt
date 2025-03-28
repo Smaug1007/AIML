@@ -1,0 +1,31 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import confusion_matrix, accuracy_score
+
+df = pd.read_csv('SNA.csv')
+
+X = df.iloc[:, [2, 3]].values
+y = df.iloc[:, 4].values
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+min_val = X_train.min()
+if min_val < 0:
+    X_train_multinomial = X_train - min_val
+    X_test_multinomial = X_test - min_val
+else:
+    X_train_multinomial = X_train
+    X_test_multinomial = X_test
+
+multinomial_classifier = MultinomialNB()
+multinomial_classifier.fit(X_train_multinomial, y_train)
+y_pred_multinomial = multinomial_classifier.predict(X_test_multinomial)
+print("Multinomial Naïve Bayes Accuracy:", accuracy_score(y_test, y_pred_multinomial))
+print("Multinomial Naïve Bayes Confusion Matrix:\n", confusion_matrix(y_test, y_pred_multinomial), "\n\n")
