@@ -1,0 +1,51 @@
+import heapq
+
+class Item:
+    def __init__(self, value, weight, index=-1):
+        self.value = value
+        self.weight = weight
+        self.index = index
+        self.ratio = value / weight if weight > 0 else 0
+
+def bound(node, capacity, items):
+    if node.weight >= capacity:
+        return 0
+    bound_value = node.value
+    total_weight = node.weight
+    j = node.index + 1
+    while j < len(items) and total_weight + items[j].weight <= capacity:
+        total_weight += items[j].weight
+        bound_value += items[j].value
+        j += 1
+    if j < len(items):
+        bound_value += (capacity - total_weight) * items[j].ratio
+    return bound_value
+
+def knapsack(capacity, items):
+    items.sort(key=lambda x: x.ratio, reverse=True)
+    max_value = 0
+    queue = []
+    root = Item(0, 0, -1)
+    heapq.heappush(queue, (-bound(root, capacity, items), root))
+    while queue:
+        _, node = heapq.heappop(queue)
+        if node.value > max_value:
+            max_value = node.value
+        if node.index + 1 >= len(items):
+            continue
+        next_index = node.index + 1
+        # Include the next item
+        include = Item(node.value + items[next_index].value,
+                       node.weight + items[next_index].weight,
+                       next_index)
+        if include.weight <= capacity and bound(include, capacity, items) > max_value:
+            heapq.heappush(queue, (-bound(include, capacity, items), include))
+        # Exclude the next item
+        exclude = Item(node.value, node.weight, next_index)
+        if bound(exclude, capacity, items) > max_value:
+            heapq.heappush(queue, (-bound(exclude, capacity, items), exclude))
+    return max_value
+
+if __name__ == "__main__":
+    items = [Item(60, 10), Item(100, 20), Item(120, 30)]
+    print("Maximum value in Knapsack =", knapsack(50, items))

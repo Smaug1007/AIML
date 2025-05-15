@@ -1,0 +1,62 @@
+class Node:
+    def __init__(self, name, heuristic):
+        self.name = name
+        self.heuristic = heuristic
+        self.children = []
+        self.parent = None
+        self.g_score = float('inf')
+        self.f_score = float('inf')
+
+def ao_star(root, goal):
+    open_set = {root}
+    root.g_score = 0
+    root.f_score = root.heuristic
+
+    while open_set:
+        print(f"Current open set: {[node.name for node in open_set]}")
+        
+        current = min(open_set, key=lambda node: node.f_score)
+        print(f"Processing node: {current.name} with f_score: {current.f_score}")
+
+        if current.name == goal:
+            return reconstruct_path(current)
+
+        open_set.remove(current)
+
+        for child in current.children:
+            if child not in open_set:
+                open_set.add(child)
+                print(f"Adding child to open set: {child.name}")
+
+            tentative_g_score = current.g_score + 1
+            if tentative_g_score < child.g_score:
+                child.parent = current
+                child.g_score = tentative_g_score
+                child.f_score = child.g_score + child.heuristic
+                print(f"Updating child: {child.name}, g_score: {child.g_score}, f_score: {child.f_score}")
+
+    return None
+
+def reconstruct_path(node):
+    path = []
+    while node:
+        path.append(node.name)
+        node = node.parent
+    return path[::-1]
+
+
+A = Node('A', 7)
+B = Node('B', 6)
+C = Node('C', 2)
+D = Node('D', 1)
+E = Node('E', 0)
+
+
+A.children = [B, C]
+B.children = [D]
+C.children = [D]
+D.children = [E]
+
+
+path = ao_star(A, 'E')
+print("Path found:", path)

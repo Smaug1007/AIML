@@ -1,0 +1,63 @@
+def eclat(data, min_support):  
+    item_tids = {}
+    for tid, transaction in enumerate(data):
+        for item in transaction:
+            if item not in item_tids:
+                item_tids[item] = set()
+            item_tids[item].add(tid)
+
+
+    frequent_items = {
+        frozenset([item]): len(tids)
+        for item, tids in item_tids.items()
+        if len(tids) >= min_support
+    }
+
+    results = frequent_items.copy() 
+
+  
+    def generate_itemsets(itemsets, tids_dict):
+        new_itemsets = {}
+        itemsets_list = list(itemsets.keys())
+        for i in range(len(itemsets_list)):
+            for j in range(i + 1, len(itemsets_list)):
+                itemset1 = itemsets_list[i]
+                itemset2 = itemsets_list[j]
+
+                union_set = itemset1.union(itemset2)
+
+                if len(union_set) == len(itemset1) + 1:
+
+                    tidset1 = tids_dict[itemset1]
+                    tidset2 = tids_dict[itemset2]
+
+                    intersection_tidset = tidset1.intersection(tidset2)
+                    support = len(intersection_tidset)
+
+                    if support >= min_support:
+                        new_itemsets[union_set] = support
+                        tids_dict[union_set] = intersection_tidset
+
+        results.update(new_itemsets)
+        if new_itemsets:
+            generate_itemsets(new_itemsets, tids_dict)
+
+    generate_itemsets(frequent_items, {frozenset([item]): tids for item, tids in item_tids.items()})
+
+    return results
+
+
+data = [
+    ['A', 'B', 'C'],
+    ['A', 'C', 'D'],
+    ['B', 'C', 'E'],
+    ['A', 'B', 'C', 'E'],
+    ['A', 'B', 'C', 'D']
+]
+
+min_support = 2  
+
+frequent_itemsets = eclat(data, min_support)
+
+for itemset, support in frequent_itemsets.items():
+    print(f"{set(itemset)}: {support}")
